@@ -73,7 +73,7 @@ def VSH_Memn(m, n, rho, theta, phi, superscript=1):
     
     Mp = -np.cos(m * phi) * dPnm
 
-    Mr = np.zeros(np.spape(Mp))
+    Mr = np.zeros(np.shape(Mp))
     
     return np.array([Mr, Mt*zn, Mp*zn])
 
