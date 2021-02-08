@@ -17,26 +17,26 @@ def vectorFieldCoverter_sph2car(Asph, r, theta, phi):
     
     return R_rot @ Asph
 
-r = 10  # must be far field r >> 1 
-m, n = 1, 1
+r = 10
+m, n = 0, 1
 
 # Neven, Meven, Nodd, Modd
-mode_type = "Nodd"
+mode_type = "Meven"
 
 plot_title = ""
 
 if mode_type == "Neven":
     mode_func = VSH_Nemn
-    plot_title = "Ne" + str(m) + str(m)
+    plot_title = "Ne" + str(m) + str(n)
 elif mode_type == "Meven":
     mode_func = VSH_Memn
-    plot_title = "Me" + str(m) + str(m)
+    plot_title = "Me" + str(m) + str(n)
 elif mode_type == "Nodd":
     mode_func = VSH_Nomn
-    plot_title = "No" + str(m) + str(m)
+    plot_title = "No" + str(m) + str(n)
 elif mode_type == "Modd":
     mode_func = VSH_Momn
-    plot_title = "Mo" + str(m) + str(m)
+    plot_title = "Mo" + str(m) + str(n)
 else:
     print("ERROR")
 
@@ -62,10 +62,15 @@ rr = rr / np.max(rr)
 # ---------------------------------------------------------
 # DATA FOR CONES
 # ---------------------------------------------------------
-ttt = np.linspace(0, stop=pi, num=20)
-ppp = np.linspace(0, stop=2*pi, num=30)
+num_pts = 300
+indices = np.arange(0, num_pts, dtype=float) + 0.5
 
-SIZE_LINEAR = (np.size(ttt) + 0) * (np.size(ppp) + 1)
+# equally distributed points on a sphere
+# https://stackoverflow.com/questions/9600801/evenly-distributing-n-points-on-a-sphere
+ppp = pi * (1 + 5**0.5) * indices 
+ttt = np.arccos(1 - 2*indices/num_pts)
+
+SIZE_LINEAR = num_pts
 
 xxx = np.zeros(SIZE_LINEAR)
 yyy = np.zeros(SIZE_LINEAR)
@@ -76,24 +81,20 @@ AAz = np.zeros(SIZE_LINEAR)
 
 AAabs = np.zeros(SIZE_LINEAR)
 
+for index in range(SIZE_LINEAR):
+    pp = ppp[index]
+    tt = ttt[index]
+    
+    xxx[index] = np.cos(pp) * np.sin(tt)
+    yyy[index] = np.sin(pp) * np.sin(tt)
+    zzz[index] = np.cos(tt)
 
-index = 0
-for (itt, tt) in enumerate(ttt):
-    for (ipp, pp) in enumerate(ppp):
-        
-        xxx[index] = np.cos(pp) * np.sin(tt)
-        yyy[index] = np.sin(pp) * np.sin(tt)
-        zzz[index] = np.cos(tt)
-        
-        #print(np.array([xxx[index], yyy[index], zzz[index]]))
-        AAx[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[0]
-        AAy[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[1]
-        AAz[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[2]
-        AAabs[index] = np.sqrt(AAx[index]**2 + AAy[index]**2 + AAz[index]**2)
-        
-        
-        index += 1
-    index += 1
+    #print(np.array([xxx[index], yyy[index], zzz[index]]))
+    AAx[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[0]
+    AAy[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[1]
+    AAz[index] = vectorFieldCoverter_sph2car(mode_func(m, n, r, tt, pp), 1, tt, pp)[2]
+    AAabs[index] = np.sqrt(AAx[index]**2 + AAy[index]**2 + AAz[index]**2)
+
 
 # normalization of the vector field
 AAx = AAx / np.max(AAabs)
@@ -103,9 +104,6 @@ AAz = AAz / np.max(AAabs)
 # ---------------------------------------------------------
 # DATA FOR THE SPIN
 # ---------------------------------------------------------
-
-
-
 
 
 fig = go.Figure()
@@ -128,7 +126,7 @@ fig.add_trace(
         w=AAz,
         #colorscale='deep', # https://plotly.com/python/builtin-colorscales/
         sizemode="absolute",
-        sizeref=3.5,
+        sizeref=0.1,
         showscale=False,
         opacity=1,
     )
