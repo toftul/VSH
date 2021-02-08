@@ -17,11 +17,11 @@ def vectorFieldCoverter_sph2car(Asph, r, theta, phi):
     
     return R_rot @ Asph
 
-r = 1
+r = 10  # must be far field r >> 1 
 m, n = 1, 1
 
 # Neven, Meven, Nodd, Modd
-mode_type = "Meven"
+mode_type = "Nodd"
 
 plot_title = ""
 
@@ -114,7 +114,7 @@ fig = go.Figure()
 fig.add_trace(
     go.Surface(
         x=rr*xx, y=rr*yy, z=rr*zz, surfacecolor=rr,
-        colorscale='gray',
+        colorscale='viridis',
     )
 )
 
@@ -126,7 +126,7 @@ fig.add_trace(
         u=AAx,
         v=AAy,
         w=AAz,
-        colorscale='deep', # https://plotly.com/python/builtin-colorscales/
+        #colorscale='deep', # https://plotly.com/python/builtin-colorscales/
         sizemode="absolute",
         sizeref=3.5,
         showscale=False,
