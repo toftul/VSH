@@ -30,6 +30,14 @@ def VSH_Memn(m, n, rho, theta, phi, superscript=1):
             m = 0, ..., n
             superscript = 1, 2, 3, 4
     '''
+    # convert input to np arrays 
+    rho = np.asarray(rho)
+    theta = np.asarray(theta)
+    phi = np.asarray(phi)
+    
+    # to prevent devision by zero
+    theta[theta < 1e-15] = 1e-15
+    
     Mt = 0
     Mp = 0
 
@@ -51,14 +59,23 @@ def VSH_Memn(m, n, rho, theta, phi, superscript=1):
     
 
     Mt = -m / np.sin(theta) * np.sin(m * phi) * lpmv(m, n, np.cos(theta))
+    
 
-    # lazy to write a proper derivative
-    dtheta = 1e-12
-    dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
-
+    # formula for the d_θ Pnm(cos θ) is from here (I got a different sign though...)
+    # https://math.stackexchange.com/questions/391672/derivative-of-associated-legendre-polynomials-at-x-pm-1
+    # https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html
+    dPnm = 1/np.sin(theta) * (np.abs(np.sin(theta)) * lpmv(m+1, n, np.cos(theta)) + m * np.cos(theta) *  lpmv(m, n, np.cos(theta)))
+    
+    # an old way
+    # dtheta = 1e-12
+    # dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
+    
+    
     Mp = -np.cos(m * phi) * dPnm
 
-    return np.array([0, Mt*zn, Mp*zn])
+    Mr = np.zeros(np.spape(Mp))
+    
+    return np.array([Mr, Mt*zn, Mp*zn])
 
 
 def VSH_Momn(m, n, rho, theta, phi, superscript=1):
@@ -75,6 +92,15 @@ def VSH_Momn(m, n, rho, theta, phi, superscript=1):
             m = 0, ..., n
             superscript = 1, 2, 3, 4
     '''
+    # convert input to np arrays 
+    rho = np.asarray(rho)
+    theta = np.asarray(theta)
+    phi = np.asarray(phi)
+    
+    # to prevent devision by zero
+    theta[theta < 1e-15] = 1e-15
+    
+    
     Mt = 0
     Mp = 0
 
@@ -96,14 +122,22 @@ def VSH_Momn(m, n, rho, theta, phi, superscript=1):
     
 
     Mt = m / np.sin(theta) * np.cos(m * phi) * lpmv(m, n, np.cos(theta))
+    
 
-    # lazy to write a proper derivative
-    dtheta = 1e-12
-    dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
+    # formula for the d_θ Pnm(cos θ) is from here (I got a different sign though...)
+    # https://math.stackexchange.com/questions/391672/derivative-of-associated-legendre-polynomials-at-x-pm-1
+    # https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html
+    dPnm = 1/np.sin(theta) * (np.abs(np.sin(theta)) * lpmv(m+1, n, np.cos(theta)) + m * np.cos(theta) *  lpmv(m, n, np.cos(theta)))
+    
+    # an old way
+    # dtheta = 1e-12
+    # dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
 
     Mp = -np.sin(m * phi) * dPnm
 
-    return np.array([0, Mt*zn, Mp*zn])
+    Mr = np.zeros(np.shape(Mp))
+    
+    return np.array([Mr, Mt*zn, Mp*zn])
 
 
 def VSH_Nemn(m, n, rho, theta, phi, superscript=1):
@@ -120,6 +154,14 @@ def VSH_Nemn(m, n, rho, theta, phi, superscript=1):
             m = 0, ..., n
             superscript = 1, 2, 3, 4
     '''
+    # convert input to np arrays 
+    rho = np.asarray(rho)
+    theta = np.asarray(theta)
+    phi = np.asarray(phi)
+    
+    # to prevent devision by zero
+    theta[theta < 1e-15] = 1e-15
+    
     Nr = 0
     Nt = 0
     Np = 0
@@ -147,8 +189,16 @@ def VSH_Nemn(m, n, rho, theta, phi, superscript=1):
     
 
     Pnm = lpmv(m, n, np.cos(theta))
-    dtheta = 1e-12
-    dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
+    
+    # formula for the d_θ Pnm(cos θ) is from here (I got a different sign though...)
+    # https://math.stackexchange.com/questions/391672/derivative-of-associated-legendre-polynomials-at-x-pm-1
+    # https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html
+    dPnm = 1/np.sin(theta) * (np.abs(np.sin(theta)) * lpmv(m+1, n, np.cos(theta)) + m * np.cos(theta) *  lpmv(m, n, np.cos(theta)))
+
+    
+    # an old way
+    # dtheta = 1e-12
+    # dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
 
     Nr = zn/rho * np.cos(m*phi) * n * (n+1) * Pnm
     Nt = np.cos(m * phi) * dPnm * (zn/rho + znp)
@@ -170,6 +220,14 @@ def VSH_Nomn(m, n, rho, theta, phi, superscript=1):
             m = 0, ..., n
             superscript = 1, 2, 3, 4
     '''
+    # convert input to np arrays 
+    rho = np.asarray(rho)
+    theta = np.asarray(theta)
+    phi = np.asarray(phi)
+    
+    # to prevent devision by zero
+    theta[theta < 1e-15] = 1e-15
+    
     Nr = 0
     Nt = 0
     Np = 0
@@ -197,8 +255,15 @@ def VSH_Nomn(m, n, rho, theta, phi, superscript=1):
     
 
     Pnm = lpmv(m, n, np.cos(theta))
-    dtheta = 1e-12
-    dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
+    
+    # formula for the d_θ Pnm(cos θ) is from here (I got a different sign though...)
+    # https://math.stackexchange.com/questions/391672/derivative-of-associated-legendre-polynomials-at-x-pm-1
+    # https://mathworld.wolfram.com/AssociatedLegendrePolynomial.html
+    dPnm = 1/np.sin(theta) * (np.abs(np.sin(theta)) * lpmv(m+1, n, np.cos(theta)) + m * np.cos(theta) *  lpmv(m, n, np.cos(theta)))
+    
+    # an old way
+    # dtheta = 1e-12
+    # dPnm = (lpmv(m, n, np.cos(theta + dtheta)) - lpmv(m, n, np.cos(theta - dtheta))) / (2*dtheta)
 
     Nr = zn/rho * np.sin(m * phi) * n * (n+1) * Pnm
     Nt = np.sin(m * phi) * dPnm * (zn/rho + znp)
